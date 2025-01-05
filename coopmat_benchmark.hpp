@@ -127,8 +127,6 @@ public:
 
 private:
 
-    
-
     a_type* a_mapped_ptr;
     b_type* b_mapped_ptr;
     c_type* c_mapped_ptr;

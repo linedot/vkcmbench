@@ -1,10 +1,10 @@
 #include "coopmat_benchmark.hpp"
 #include "coopmat_benchmark_shader.hpp"
 #include "vk_component_type_to_str.hpp"
-#include "vk_device_type_to_str.hpp"
 
 #include <fmt/core.h>
 #include <vulkan/vulkan.h>
+#include <vulkan/vk_enum_string_helper.h>
 
 #include <boost/container_hash/hash.hpp>
 
@@ -176,7 +176,7 @@ int main()
 
         fmt::print("Physical device {}:\n", i);
         fmt::print("  Name:        {}\n", properties.properties.deviceName);
-        fmt::print("  Device type: {}\n", device_type_to_str(properties.properties.deviceType));
+        fmt::print("  Device type: {}\n", string_VkPhysicalDeviceType(properties.properties.deviceType));
         fmt::print("  Driver Name: {}\n", pdv12p.driverName);
         fmt::print("  Driver Ver.: {}\n", driver_version_to_str(properties, pdv12p));
 
