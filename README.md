@@ -284,7 +284,7 @@ Destroying vulkan instance 0X55BCF66EC1F0
 Vulkan instance destroyed
 ```
 
-## Example AMD Desktop GPU without hardware support (Instructions emulated by AMDGPU Pro driver)
+## Example AMD Desktop GPU without hardware support: RX 6800 XT (Instructions emulated by AMDGPU Pro driver)
 
 (NOTE: Compiler probably overoptimizes, as these numbers are way too high)
 ```
@@ -390,7 +390,7 @@ Destroying vulkan instance 0X5B532CDEB4D0
 Vulkan instance destroyed
 ```
 
-## Example AMD Desktop GPU without hardware support (RADV driver):
+## Example AMD Desktop GPU without hardware support (RADV driver): RX 6800 XT
 
 ```
 Number of Layers: 15
