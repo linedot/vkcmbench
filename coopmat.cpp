@@ -209,59 +209,12 @@ int main()
             {
                 pd_to_use.push_back(i);
             }
-            if (eprops.extensionName == std::string("VK_KHR_performance_query"))
-            {
-                pd_to_check_pq.push_back(i);
-            }
         }
     }
     if(pd_to_use.empty())
     {
         fmt::print("No device supports VK_KHR_cooperative_matrix!\n");
     }
-    // This is for another time
-    //for(auto pd_idx : pd_to_check_pq)
-    //{
-    //    auto phy_dev = physical_devices[pd_idx];
-
-    //    std::vector<VkQueueFamilyProperties2> qfps;
-    //    std::uint32_t queue_count;
-    //    vkGetPhysicalDeviceQueueFamilyProperties2(phy_dev, &queue_count, nullptr);
-    //    qfps.resize(queue_count);
-    //    for(auto& qfp : qfps){qfp.sType = VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2;}
-    //    vkGetPhysicalDeviceQueueFamilyProperties2(phy_dev, &queue_count, qfps.data());
-
-
-    //    for(std::size_t i = 0; i < qfps.size(); i++)
-    //    {
-
-    //        PFN_vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR
-    //            _vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR =
-    //            reinterpret_cast<PFN_vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR>(
-    //            vkGetInstanceProcAddr(instance,
-    //                    "vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR"));
-
-    //        std::uint32_t counter_count;
-    //        _vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR(phy_dev, i, &counter_count, nullptr, nullptr);
-
-    //        fmt::print("PDev {}; queue Family {} has {} performance counters:\n", pd_idx, i, counter_count);
-    //        std::vector<VkPerformanceCounterKHR> counters(counter_count);
-    //        for(auto & c : counters) c.sType = VK_STRUCTURE_TYPE_PERFORMANCE_COUNTER_KHR;
-    //        std::vector<VkPerformanceCounterDescriptionKHR> descriptions(counter_count);
-    //        for(auto & d : descriptions) d.sType = VK_STRUCTURE_TYPE_PERFORMANCE_COUNTER_DESCRIPTION_KHR;
-    //        _vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR(
-    //                phy_dev, i,
-    //                &counter_count,
-    //                counters.data(),
-    //                descriptions.data());
-
-    //        for(std::uint32_t j = 0; j < counter_count; j++)
-    //        {
-    //            auto desc = descriptions[j];
-    //            fmt::print("    Counter {}:{} - {}\n", desc.category, desc.name, desc.description);
-    //        }
-    //    }
-    //}
 
     std::vector<VkDevice> devices;
 
@@ -467,6 +420,7 @@ int main()
         for(auto& cmp : cmprops){cmp.sType=VK_STRUCTURE_TYPE_COOPERATIVE_MATRIX_PROPERTIES_KHR;}
         _vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR(phy_dev, &prop_count, cmprops.data());
 
+        // Not replacing with util lib for space reasons
         auto scope_to_str = [](VkScopeKHR scope)
         {
             switch(scope)
