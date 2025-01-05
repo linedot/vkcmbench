@@ -76,7 +76,6 @@ int main()
     std::vector<VkLayerProperties> layer_properties;
 
     vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
-    fmt::print("Number of Layers: {}\n", layer_count);
 
     layer_properties.resize(layer_count);
 
@@ -146,7 +145,6 @@ int main()
         return -1;
     }
 
-    fmt::print("Vulkan instance created successfully: {:#08X}\n", ITOP(instance));
 
 
     // Let's see what kind of physical devices we have
@@ -405,7 +403,6 @@ int main()
         VkDevice device;
         vkCreateDevice(phy_dev, &dci, nullptr, &device);
 
-        fmt::print("Device created, handle: {:x}\n", reinterpret_cast<std::size_t>(device));
 
         device_dqcis[device] = dqcis;
 
@@ -433,34 +430,30 @@ int main()
         };
         vkGetPhysicalDeviceProperties2(phy_dev, &properties);
 
-        fmt::print("def Subgroup size: {}\n", pdv11p.subgroupSize);
-        fmt::print("min Subgroup size: {}\n", pdsgscp.minSubgroupSize);
-        fmt::print("max Subgroup size: {}\n", pdsgscp.maxSubgroupSize);
-
         fmt::print("    Supports Cooperative Matrices in the following shader stages:\n");
 
-        auto check_stage = [](auto bits, auto bit_to_check, auto string)
+        auto check_stage = [](auto bits, auto bit_to_check)
         {
             if ((bits & bit_to_check) == bit_to_check)
             {
-                fmt::print("        {}\n", string);
+                fmt::print("        {}\n", string_VkShaderStageFlagBits(bit_to_check));
             }
         };
-        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_COMPUTE_BIT, "compute");
-        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_VERTEX_BIT, "vertex");
-        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_GEOMETRY_BIT, "geometry");
-        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_FRAGMENT_BIT, "fragment");
-        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT, "tess. control");
-        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT, "tess. evaluation");
-        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_RAYGEN_BIT_KHR, "raygen");
-        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_MISS_BIT_KHR, "miss");
-        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_ANY_HIT_BIT_KHR, "any hit");
-        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR, "closest hit");
-        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_INTERSECTION_BIT_KHR, "intersection");
-        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_CALLABLE_BIT_KHR, "callable");
+        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_COMPUTE_BIT);
+        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_VERTEX_BIT);
+        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_GEOMETRY_BIT);
+        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_FRAGMENT_BIT);
+        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT);
+        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
+        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
+        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_MISS_BIT_KHR);
+        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_ANY_HIT_BIT_KHR);
+        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
+        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_INTERSECTION_BIT_KHR);
+        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_CALLABLE_BIT_KHR);
 
-        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_TASK_BIT_EXT, "task");
-        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_MESH_BIT_EXT, "mesh");
+        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_TASK_BIT_EXT);
+        check_stage(pdcmp.cooperativeMatrixSupportedStages, VK_SHADER_STAGE_MESH_BIT_EXT);
 
 
         PFN_vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR _vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR = nullptr;
@@ -486,29 +479,25 @@ int main()
             }
         };
 
-        fmt::print("Supported Cooperative Matrices:\n");
+        fmt::print("    Will benchmark the following reported configurations:\n");
         fmt::print("        M  x  N x  K,   A,   B,   C,   D,  scope, sat\n");
+
+        std::vector<VkCooperativeMatrixPropertiesKHR> skipped_cmprops;
+
         for(auto& cmprop : cmprops)
         {
-            fmt::print("        {:2d} x {:2d} x {:2d}, {:3}, {:3}, {:3}, {:3}, {:6}, {:3}\n",
-                    cmprop.MSize, cmprop.NSize, cmprop.KSize,
-                    component_type_to_str(cmprop.AType),
-                    component_type_to_str(cmprop.BType),
-                    component_type_to_str(cmprop.CType),
-                    component_type_to_str(cmprop.ResultType),
-                    scope_to_str(cmprop.scope),
-		    cmprop.saturatingAccumulation);
 
+            bool skip = false;
             if (VK_SCOPE_SUBGROUP_KHR != cmprop.scope)
             {
-                fmt::print("Only subgroups supported right now, skipping\n");
-                continue;
+                //fmt::print("Only subgroups supported right now, skipping\n");
+                skip = true;
             }
 	        // s8 + u8 exposed by AMD and fails, not sure what's wrong
             if (cmprop.AType != cmprop.BType)
             {
-                fmt::print("known buggy type, skipping\n");
-                continue;
+                //fmt::print("known buggy type, skipping\n");
+                skip = true;
             }
 	        // I don't know what the AMDGPU pro vulkan driver exposes here, but
             // there is no VkComponentTypeKHR with integer value 1000142000,
@@ -518,15 +507,30 @@ int main()
             {
                 if (t > max_ct_value)
                 {
-                    fmt::print("unsupported {} type (value={}), skipping\n", c, static_cast<std::uint32_t>(t));
+                    //fmt::print("unsupported {} type (value={}), skipping\n", c, static_cast<std::uint32_t>(t));
                     return false;
                 }
                 return true;
             };
-            if(!type_check("a", cmprop.AType)) continue;
-            if(!type_check("b", cmprop.BType)) continue;
-            if(!type_check("c", cmprop.CType)) continue;
-            if(!type_check("d", cmprop.ResultType)) continue;
+            skip = skip || !type_check("a", cmprop.AType);
+            skip = skip || !type_check("b", cmprop.BType);
+            skip = skip || !type_check("c", cmprop.CType);
+            skip = skip || !type_check("d", cmprop.ResultType);
+
+            if(skip)
+            {
+                skipped_cmprops.push_back(cmprop);
+                continue;
+            }
+
+            fmt::print("        {:2d} x {:2d} x {:2d}, {:3}, {:3}, {:3}, {:3}, {:6}, {:3}\n",
+                    cmprop.MSize, cmprop.NSize, cmprop.KSize,
+                    component_type_to_str(cmprop.AType),
+                    component_type_to_str(cmprop.BType),
+                    component_type_to_str(cmprop.CType),
+                    component_type_to_str(cmprop.ResultType),
+                    scope_to_str(cmprop.scope),
+                    cmprop.saturatingAccumulation);
 
             // Somewhat confused about this.
             // On Windows the AMD driver has emulated cooperative matrices on RDNA2,
@@ -564,7 +568,7 @@ int main()
                         cmprop.AType, cmprop.BType, cmprop.CType,
                         subgroup_size,
                         insts_in_block,
-			blocks_in_kernel);
+                        blocks_in_kernel);
                 if(auto findit = device_shader_configs.find(device); findit == device_shader_configs.end())
                 {
                     device_shader_configs[device] = coopmat_benchmark_shader::create_configuration(device);
@@ -573,6 +577,24 @@ int main()
             }
 
             benchmarks.push_back(std::move(benchmark));
+        }
+
+        if(!skipped_cmprops.empty())
+        {
+            fmt::print("    Will skip the following reported configurations:\n");
+            fmt::print("        M  x  N x  K,   A,   B,   C,   D,  scope, sat\n");
+        }
+
+        for(auto& cmprop : skipped_cmprops)
+        {
+            fmt::print("        {:2d} x {:2d} x {:2d}, {:3}, {:3}, {:3}, {:3}, {:6}, {:3}\n",
+                    cmprop.MSize, cmprop.NSize, cmprop.KSize,
+                    component_type_to_str(cmprop.AType),
+                    component_type_to_str(cmprop.BType),
+                    component_type_to_str(cmprop.CType),
+                    component_type_to_str(cmprop.ResultType),
+                    scope_to_str(cmprop.scope),
+                    cmprop.saturatingAccumulation);
         }
 
         devices.push_back(device);
@@ -588,12 +610,6 @@ int main()
         fmt::print("=========================================================");
         fmt::print("\n");
         auto cmprop = benchmarks[i]->get_cmprops();
-        fmt::print("Creating buffers for: {:2d} x {:2d} x {:2d}, {:3}, {:3}, {:3}, {:3}\n",
-                cmprop.MSize, cmprop.NSize, cmprop.KSize,
-                component_type_to_str(cmprop.AType),
-                component_type_to_str(cmprop.BType),
-                component_type_to_str(cmprop.CType),
-                component_type_to_str(cmprop.ResultType));
         benchmarks[i]->create_buffers();
         fmt::print("Running benchmark for: {:2d} x {:2d} x {:2d}, {:3}, {:3}, {:3}, {:3}\n",
                 cmprop.MSize, cmprop.NSize, cmprop.KSize,
@@ -638,12 +654,6 @@ int main()
         vkAllocateCommandBuffers(device, &cbai, &command_buffer);
 
         benchmarks[i]->run(config, queue, command_buffer, blocks_in_kernel);
-        fmt::print("Cleaning up for: {:2d} x {:2d} x {:2d}, {:3}, {:3}, {:3}, {:3}\n",
-                cmprop.MSize, cmprop.NSize, cmprop.KSize,
-                component_type_to_str(cmprop.AType),
-                component_type_to_str(cmprop.BType),
-                component_type_to_str(cmprop.CType),
-                component_type_to_str(cmprop.ResultType));
         benchmarks[i]->cleanup();
         benchmarks[i]->destroy_buffers();
 
@@ -673,10 +683,6 @@ int main()
     }
 
 
-    fmt::print("Destroying vulkan instance {:#08X}\n", ITOP(instance));
     vkDestroyInstance(instance, nullptr);
-
-    fmt::print("Vulkan instance destroyed\n");
-
     return 0;
 }

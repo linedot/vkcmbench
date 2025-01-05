@@ -107,9 +107,6 @@ coopmat_benchmark_shader::coopmat_benchmark_shader(
 
     vkCreateShaderModule(device, &smci, nullptr, &shader);
 
-    fmt::print("Shader module {:x} created for device {:x}\n",
-		    reinterpret_cast<std::size_t>(shader),
-		    reinterpret_cast<std::size_t>(device));
 
     shaderc_result_release(result);
     shaderc_compile_options_release(options);
